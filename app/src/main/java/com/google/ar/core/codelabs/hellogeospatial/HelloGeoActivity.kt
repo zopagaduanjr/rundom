@@ -83,7 +83,12 @@ class HelloGeoActivity : AppCompatActivity() {
 
   // Configure the session, setting the desired options according to your usecase.
   fun configureSession(session: Session) {
-    // TODO: Configure ARCore to use GeospatialMode.ENABLED.
+    session.configure(
+      session.config.apply {
+        // Enable Geospatial Mode.
+        geospatialMode = Config.GeospatialMode.ENABLED
+      }
+    )
   }
 
   override fun onRequestPermissionsResult(

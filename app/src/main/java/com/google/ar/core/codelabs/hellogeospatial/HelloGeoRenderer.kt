@@ -92,7 +92,7 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
           Texture.ColorFormat.SRGB
         )
 
-      virtualObjectMesh = Mesh.createFromAsset(render, "models/geospatial_marker.obj");
+      virtualObjectMesh = Mesh.createFromAsset(render, "models/geospatial_marker.obj")
       virtualObjectShader =
         Shader.createFromAssets(
           render,
@@ -188,15 +188,18 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
     }
 
     // Draw the placed anchor, if it exists.
-    earthAnchor?.let {
-      render.renderCompassAtAnchor(it)
+
+    for (item in earthAnchors){
+      item.let {
+        render.renderCompassAtAnchor(it)
+      }
     }
 
     // Compose the virtual scene with the background.
     backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR)
   }
 
-  var earthAnchor: Anchor? = null
+  var earthAnchors: Array<Anchor> = arrayOf()
 
   fun onMapClick(latLng: LatLng) {
     // TODO: place an anchor at the given position.
@@ -204,20 +207,7 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
     if (earth.trackingState != TrackingState.TRACKING) {
       return
     }
-    earthAnchor?.detach()
-    // Place the earth anchor at the same altitude as that of the camera to make it easier to view.
-    val altitude = earth.cameraGeospatialPose.altitude - 1
-    // The rotation quaternion of the anchor in the East-Up-South (EUS) coordinate system.
-    val qx = 0f
-    val qy = 0f
-    val qz = 0f
-    val qw = 1f
-    earthAnchor =
-      earth.createAnchor(latLng.latitude, latLng.longitude, altitude, qx, qy, qz, qw)
-    activity.view.mapView?.earthMarker?.apply {
-      position = latLng
-      isVisible = true
-    }
+    earthAnchors = activity.view.mapView?.generateStars(earth) ?: arrayOf()
   }
 
   private fun SampleRender.renderCompassAtAnchor(anchor: Anchor) {

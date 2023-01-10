@@ -21,7 +21,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.LightingColorFilter
 import android.graphics.Paint
-import android.util.Log
 import androidx.annotation.ColorInt
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -30,8 +29,14 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.ar.core.Anchor
+import com.google.ar.core.Earth
 import com.google.ar.core.codelabs.hellogeospatial.HelloGeoActivity
 import com.google.ar.core.codelabs.hellogeospatial.R
+import java.util.*
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 class MapView(val activity: HelloGeoActivity, val googleMap: GoogleMap) {
   private val CAMERA_MARKER_COLOR: Int = Color.argb(255, 0, 255, 0)
@@ -58,6 +63,45 @@ class MapView(val activity: HelloGeoActivity, val googleMap: GoogleMap) {
     googleMap.setOnCameraMoveListener { cameraIdle = false }
     googleMap.setOnCameraIdleListener { cameraIdle = true }
   }
+
+  fun generateStars(earth: Earth): Array<Anchor>{
+    var anchors = arrayOf<Anchor>()
+    val location = earth.cameraGeospatialPose
+    val meterRadius = 50
+    for (i in 1..5) {
+      val random = Random()
+      val radiusInDegrees = (meterRadius / 111000f).toDouble()
+
+      val u: Double = random.nextDouble()
+      val v: Double = random.nextDouble()
+      val w = radiusInDegrees * sqrt(u)
+      val t = 2 * Math.PI * v
+      val x = w * cos(t)
+      val y = w * sin(t)
+      val newX = x / cos(Math.toRadians(location.longitude))
+
+      val foundLongitude: Double = newX + location.latitude
+      val foundLatitude: Double = y + location.longitude
+      val ranLoc = LatLng(foundLongitude, foundLatitude)
+      googleMap.addMarker(MarkerOptions().position(ranLoc).title("Star $i"))
+
+      //anchors away
+      // Place the earth anchor at the same altitude as that of the camera to make it easier to view.
+      val altitude = earth.cameraGeospatialPose.altitude - 1
+      // The rotation quaternion of the anchor in the East-Up-South (EUS) coordinate system.
+      val qx = 0f
+      val qy = 0f
+      val qz = 0f
+      val qw = 1f
+      anchors += earth.createAnchor(ranLoc.latitude, ranLoc.longitude, altitude, qx, qy, qz, qw)
+      activity.view.mapView?.earthMarker?.apply {
+        position = ranLoc
+        isVisible = true
+      }
+    }
+    return anchors
+  }
+
 
   fun updateMapPosition(latitude: Double, longitude: Double, heading: Double) {
     val position = LatLng(latitude, longitude)

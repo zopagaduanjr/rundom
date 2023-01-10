@@ -19,7 +19,6 @@ import android.opengl.Matrix
 import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.google.android.gms.maps.model.LatLng
 import com.google.ar.core.Anchor
 import com.google.ar.core.TrackingState
 import com.google.ar.core.examples.java.common.helpers.DisplayRotationHelper
@@ -200,13 +199,13 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
   }
 
   var earthAnchors: Array<Anchor> = arrayOf()
-
-  fun onMapClick(latLng: LatLng) {
+  fun startRundom() {
     // TODO: place an anchor at the given position.
     val earth = session?.earth ?: return
     if (earth.trackingState != TrackingState.TRACKING) {
       return
     }
+    Log.i("AMDG ey ey ey ", "ererer")
     earthAnchors = activity.view.mapView?.generateStars(earth) ?: arrayOf()
   }
 

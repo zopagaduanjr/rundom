@@ -21,7 +21,6 @@ import android.widget.TextView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
 import com.google.ar.core.Earth
 import com.google.ar.core.GeospatialPose
 import com.google.ar.core.codelabs.hellogeospatial.HelloGeoActivity
@@ -39,13 +38,7 @@ class HelloGeoView(val activity: HelloGeoActivity) : DefaultLifecycleObserver {
   val snackbarHelper = SnackbarHelper()
 
   var mapView: MapView? = null
-  val mapTouchWrapper = root.findViewById<MapTouchWrapper>(R.id.map_wrapper).apply {
-    setup { screenLocation ->
-      val latLng: LatLng =
-        mapView?.googleMap?.projection?.fromScreenLocation(screenLocation) ?: return@setup
-      activity.renderer.onMapClick(latLng)
-    }
-  }
+
   val mapFragment =
     (activity.supportFragmentManager.findFragmentById(R.id.map)!! as SupportMapFragment).also {
       it.getMapAsync { googleMap -> mapView = MapView(activity, googleMap) }

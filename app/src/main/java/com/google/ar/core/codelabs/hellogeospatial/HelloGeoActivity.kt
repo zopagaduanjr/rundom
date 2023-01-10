@@ -17,6 +17,8 @@ package com.google.ar.core.codelabs.hellogeospatial
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.ar.core.Config
@@ -76,8 +78,12 @@ class HelloGeoActivity : AppCompatActivity() {
     view = HelloGeoView(this)
     lifecycle.addObserver(view)
     setContentView(view.root)
-
     // Sets up an example renderer using our HelloGeoRenderer.
+    val button: Button = findViewById(R.id.start_button)
+    button.setOnClickListener(){
+      view.activity.renderer.startRundom()
+      button.visibility = View.INVISIBLE
+    }
     SampleRender(view.surfaceView, renderer, assets)
   }
 

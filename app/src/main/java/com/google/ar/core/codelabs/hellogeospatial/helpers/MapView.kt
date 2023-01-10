@@ -40,19 +40,16 @@ import kotlin.math.sqrt
 
 class MapView(val activity: HelloGeoActivity, val googleMap: GoogleMap) {
   private val CAMERA_MARKER_COLOR: Int = Color.argb(255, 0, 255, 0)
-  private val EARTH_MARKER_COLOR: Int = Color.argb(255, 125, 125, 125)
 
   var setInitialCameraPosition = false
   val cameraMarker = createMarker(CAMERA_MARKER_COLOR)
   var cameraIdle = true
 
-  val earthMarker = createMarker(EARTH_MARKER_COLOR)
-
   init {
     googleMap.uiSettings.apply {
       isMapToolbarEnabled = false
       isIndoorLevelPickerEnabled = false
-      isZoomControlsEnabled = false
+      isZoomControlsEnabled = true
       isTiltGesturesEnabled = false
       isScrollGesturesEnabled = false
     }
@@ -67,7 +64,7 @@ class MapView(val activity: HelloGeoActivity, val googleMap: GoogleMap) {
   fun generateStars(earth: Earth): Array<Anchor>{
     var anchors = arrayOf<Anchor>()
     val location = earth.cameraGeospatialPose
-    val meterRadius = 50
+    val meterRadius = 250
     for (i in 1..5) {
       val random = Random()
       val radiusInDegrees = (meterRadius / 111000f).toDouble()
@@ -94,10 +91,10 @@ class MapView(val activity: HelloGeoActivity, val googleMap: GoogleMap) {
       val qz = 0f
       val qw = 1f
       anchors += earth.createAnchor(ranLoc.latitude, ranLoc.longitude, altitude, qx, qy, qz, qw)
-      activity.view.mapView?.earthMarker?.apply {
-        position = ranLoc
-        isVisible = true
-      }
+//      activity.view.mapView?.earthMarker?.apply {
+//        position = ranLoc
+//        isVisible = true
+//      }
     }
     return anchors
   }

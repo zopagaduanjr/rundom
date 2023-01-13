@@ -61,11 +61,12 @@ class MapView(val activity: HelloGeoActivity, val googleMap: GoogleMap) {
     googleMap.setOnCameraIdleListener { cameraIdle = true }
   }
 
-  fun generateStars(earth: Earth): Array<Anchor>{
-    var anchors = arrayOf<Anchor>()
+  fun generateStars(earth: Earth): Pair<ArrayList<Anchor>, ArrayList<Marker>>{
+    val anchors = arrayListOf<Anchor>()
+    val markers = arrayListOf<Marker>()
     val location = earth.cameraGeospatialPose
-    val meterRadius = 250
-    for (i in 1..5) {
+    val meterRadius = 5
+    for (i in 1..2) {
       val random = Random()
       val radiusInDegrees = (meterRadius / 111000f).toDouble()
 
@@ -80,8 +81,10 @@ class MapView(val activity: HelloGeoActivity, val googleMap: GoogleMap) {
       val foundLongitude: Double = newX + location.latitude
       val foundLatitude: Double = y + location.longitude
       val ranLoc = LatLng(foundLongitude, foundLatitude)
-      googleMap.addMarker(MarkerOptions().position(ranLoc).title("Star $i"))
-
+      val marker: Marker? = googleMap.addMarker(MarkerOptions().position(ranLoc).title("Star $i"))
+      if(marker != null){
+        markers.add(marker)
+      }
       //anchors away
       // Place the earth anchor at the same altitude as that of the camera to make it easier to view.
       val altitude = earth.cameraGeospatialPose.altitude - 1
@@ -90,13 +93,10 @@ class MapView(val activity: HelloGeoActivity, val googleMap: GoogleMap) {
       val qy = 0f
       val qz = 0f
       val qw = 1f
-      anchors += earth.createAnchor(ranLoc.latitude, ranLoc.longitude, altitude, qx, qy, qz, qw)
-//      activity.view.mapView?.earthMarker?.apply {
-//        position = ranLoc
-//        isVisible = true
-//      }
+      val anchor = earth.createAnchor(ranLoc.latitude, ranLoc.longitude, altitude, qx, qy, qz, qw)
+      anchors.add(anchor)
     }
-    return anchors
+    return Pair(anchors,markers)
   }
 
 

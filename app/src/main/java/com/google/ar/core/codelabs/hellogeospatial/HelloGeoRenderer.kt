@@ -15,10 +15,16 @@
  */
 package com.google.ar.core.codelabs.hellogeospatial
 
+import android.location.Location
 import android.opengl.Matrix
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.view.View
+import android.widget.Button
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.google.android.gms.maps.model.Marker
 import com.google.ar.core.Anchor
 import com.google.ar.core.TrackingState
 import com.google.ar.core.examples.java.common.helpers.DisplayRotationHelper
@@ -193,21 +199,61 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
         render.renderCompassAtAnchor(it)
       }
     }
+    var nearestAnchorIndex: Pair<Int?,Float?> = Pair(null,null)
+    Log.i("AMDG markers length:","${markers.size}")
+    val handler = Handler(Looper.getMainLooper())
+    handler.post {
+      markers.forEachIndexed{index, item ->
+        if(earth != null){
+          val itemLoc = Location("itemLoc")
+          val userLoc = Location("userLoc")
+          itemLoc.latitude = item.position.latitude
+          itemLoc.longitude = item.position.longitude
+          userLoc.latitude = earth.cameraGeospatialPose.latitude
+          userLoc.longitude = earth.cameraGeospatialPose.longitude
+          val dist = itemLoc.distanceTo(userLoc)
+          Log.i("AMDG item index: $index", "dist: $dist")
+          if(dist < (nearestAnchorIndex.second ?: Float.MAX_VALUE)){
+            nearestAnchorIndex = Pair(index,dist)
+          }
+          if(dist < 10){
+            val collectButton: Button = activity.findViewById(R.id.collect_button)
+            collectButton.visibility = View.VISIBLE
+            collectButton.setOnClickListener() {
+              nearestAnchorIndex.first?.let { it1 -> collectStars(it1) }
+              collectButton.visibility = View.INVISIBLE
+            }
+          }
+        }
+      }
+    }
 
     // Compose the virtual scene with the background.
     backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR)
   }
 
-  var earthAnchors: Array<Anchor> = arrayOf()
+  var earthAnchors: ArrayList<Anchor> = arrayListOf()
+  var markers: ArrayList<Marker> = arrayListOf()
+
+
+
   fun startRundom() {
     // TODO: place an anchor at the given position.
     val earth = session?.earth ?: return
     if (earth.trackingState != TrackingState.TRACKING) {
       return
     }
-    Log.i("AMDG ey ey ey ", "ererer")
-    earthAnchors = activity.view.mapView?.generateStars(earth) ?: arrayOf()
+    val result = activity.view.mapView?.generateStars(earth) ?: Pair(arrayListOf(),arrayListOf())
+    earthAnchors = result.first
+    markers = result.second
   }
+
+   fun collectStars(index: Int){
+     earthAnchors[index].detach()
+     markers[index].remove()
+     earthAnchors.removeAt(index)
+     markers.removeAt(index)
+   }
 
   private fun SampleRender.renderCompassAtAnchor(anchor: Anchor) {
     // Get the current pose of the Anchor in world space. The Anchor pose is updated

@@ -79,11 +79,16 @@ class HelloGeoActivity : AppCompatActivity() {
     lifecycle.addObserver(view)
     setContentView(view.root)
     // Sets up an example renderer using our HelloGeoRenderer.
-    val button: Button = findViewById(R.id.start_button)
-    button.setOnClickListener(){
+    val startButton: Button = findViewById(R.id.start_button)
+    val collectButton: Button = findViewById(R.id.collect_button)
+    collectButton.visibility = View.INVISIBLE
+    startButton.setOnClickListener(){
       view.activity.renderer.startRundom()
-      button.visibility = View.INVISIBLE
+      startButton.visibility = View.INVISIBLE
     }
+    //TODO: add collect button
+
+    //TODO: add refernce to 0/5 text
     SampleRender(view.surfaceView, renderer, assets)
   }
 

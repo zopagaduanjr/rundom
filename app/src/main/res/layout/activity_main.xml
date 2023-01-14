@@ -59,7 +59,7 @@
   </com.google.ar.core.codelabs.hellogeospatial.helpers.MapTouchWrapper>
 
   <TextView
-      android:id="@+id/textView"
+      android:id="@+id/bag_textview"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:text="0/5"

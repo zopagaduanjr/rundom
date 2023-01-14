@@ -19,6 +19,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.ar.core.Config
@@ -41,7 +42,7 @@ class HelloGeoActivity : AppCompatActivity() {
 
   lateinit var arCoreSessionHelper: ARCoreSessionLifecycleHelper
   lateinit var view: HelloGeoView
-  lateinit var renderer: HelloGeoRenderer
+  private lateinit var renderer: HelloGeoRenderer
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -81,10 +82,13 @@ class HelloGeoActivity : AppCompatActivity() {
     // Sets up an example renderer using our HelloGeoRenderer.
     val startButton: Button = findViewById(R.id.start_button)
     val collectButton: Button = findViewById(R.id.collect_button)
+    val bagTextView: TextView = findViewById(R.id.bag_textview)
     collectButton.visibility = View.INVISIBLE
-    startButton.setOnClickListener(){
+    bagTextView.visibility = View.INVISIBLE
+    startButton.setOnClickListener{
       view.activity.renderer.startRundom()
       startButton.visibility = View.INVISIBLE
+      bagTextView.visibility = View.VISIBLE
     }
     //TODO: add collect button
 
@@ -93,7 +97,7 @@ class HelloGeoActivity : AppCompatActivity() {
   }
 
   // Configure the session, setting the desired options according to your usecase.
-  fun configureSession(session: Session) {
+  private fun configureSession(session: Session) {
     session.configure(
       session.config.apply {
         // Enable Geospatial Mode.

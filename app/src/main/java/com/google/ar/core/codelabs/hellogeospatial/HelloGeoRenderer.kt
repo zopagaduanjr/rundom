@@ -22,6 +22,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.TextView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.google.android.gms.maps.model.Marker
@@ -218,10 +219,15 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
           }
           if(dist < 10){
             val collectButton: Button = activity.findViewById(R.id.collect_button)
+            val bagTextView: TextView = activity.findViewById(R.id.bag_textview)
             collectButton.visibility = View.VISIBLE
             collectButton.setOnClickListener() {
               nearestAnchorIndex.first?.let { it1 -> collectStars(it1) }
               collectButton.visibility = View.INVISIBLE
+              val currentBag = bagTextView.text.toString()
+              val bagNum = currentBag.first().toString().toInt().inc()
+              val newBagNum = "$bagNum/5"
+              bagTextView.text = newBagNum
             }
           }
         }

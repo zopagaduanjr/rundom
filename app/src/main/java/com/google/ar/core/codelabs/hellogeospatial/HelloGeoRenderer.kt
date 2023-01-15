@@ -28,6 +28,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.google.android.gms.maps.model.Marker
 import com.google.ar.core.Anchor
 import com.google.ar.core.TrackingState
+import com.google.ar.core.codelabs.hellogeospatial.helpers.SuccessfulFragment
 import com.google.ar.core.examples.java.common.helpers.DisplayRotationHelper
 import com.google.ar.core.examples.java.common.helpers.TrackingStateHelper
 import com.google.ar.core.examples.java.common.samplerender.Framebuffer
@@ -204,34 +205,38 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
     Log.i("AMDG markers length:","${markers.size}")
     val handler = Handler(Looper.getMainLooper())
     handler.post {
-      markers.forEachIndexed{index, item ->
-        if(earth != null){
-          val itemLoc = Location("itemLoc")
-          val userLoc = Location("userLoc")
-          itemLoc.latitude = item.position.latitude
-          itemLoc.longitude = item.position.longitude
-          userLoc.latitude = earth.cameraGeospatialPose.latitude
-          userLoc.longitude = earth.cameraGeospatialPose.longitude
-          val dist = itemLoc.distanceTo(userLoc)
-          Log.i("AMDG item index: $index", "dist: $dist")
-          if(dist < (nearestAnchorIndex.second ?: Float.MAX_VALUE)){
-            nearestAnchorIndex = Pair(index,dist)
-          }
-          if(dist < 10){
+        markers.forEachIndexed{index, item ->
+          if(earth != null){
+            val itemLoc = Location("itemLoc")
+            val userLoc = Location("userLoc")
+            itemLoc.latitude = item.position.latitude
+            itemLoc.longitude = item.position.longitude
+            userLoc.latitude = earth.cameraGeospatialPose.latitude
+            userLoc.longitude = earth.cameraGeospatialPose.longitude
+            val dist = itemLoc.distanceTo(userLoc)
+            Log.i("AMDG item index: $index", "dist: $dist")
+            if(dist < (nearestAnchorIndex.second ?: Float.MAX_VALUE)){
+              nearestAnchorIndex = Pair(index,dist)
+            }
             val collectButton: Button = activity.findViewById(R.id.collect_button)
-            val bagTextView: TextView = activity.findViewById(R.id.bag_textview)
-            collectButton.visibility = View.VISIBLE
-            collectButton.setOnClickListener() {
-              nearestAnchorIndex.first?.let { it1 -> collectStars(it1) }
+            if(dist < 10){
+              val bagTextView: TextView = activity.findViewById(R.id.bag_textview)
+              collectButton.visibility = View.VISIBLE
+              collectButton.setOnClickListener() {
+                nearestAnchorIndex.first?.let { it1 -> collectStars(it1) }
+                collectButton.visibility = View.INVISIBLE
+                val currentBag = bagTextView.text.toString()
+                val bagNum = currentBag.first().toString().toInt().inc()
+                val newBagNum = "$bagNum/5"
+                bagTextView.text = newBagNum
+              }
+            }
+            else{
               collectButton.visibility = View.INVISIBLE
-              val currentBag = bagTextView.text.toString()
-              val bagNum = currentBag.first().toString().toInt().inc()
-              val newBagNum = "$bagNum/5"
-              bagTextView.text = newBagNum
             }
           }
         }
-      }
+
     }
 
     // Compose the virtual scene with the background.
@@ -259,6 +264,14 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
      markers[index].remove()
      earthAnchors.removeAt(index)
      markers.removeAt(index)
+     if(markers.size == 0){
+       SuccessfulFragment().show(activity.supportFragmentManager,"success-dialog")
+       val bagTextView: TextView = activity.findViewById(R.id.bag_textview)
+       bagTextView.text = "0/5"
+       bagTextView.visibility = View.INVISIBLE
+       val startButton: Button = activity.findViewById(R.id.start_button)
+       startButton.visibility = View.VISIBLE
+     }
    }
 
   private fun SampleRender.renderCompassAtAnchor(anchor: Anchor) {

@@ -15,8 +15,11 @@
  */
 package com.google.ar.core.codelabs.hellogeospatial
 
+import android.icu.text.SimpleDateFormat
+import android.icu.util.Calendar
 import android.location.Location
 import android.opengl.Matrix
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -31,14 +34,11 @@ import com.google.ar.core.TrackingState
 import com.google.ar.core.codelabs.hellogeospatial.helpers.SuccessfulFragment
 import com.google.ar.core.examples.java.common.helpers.DisplayRotationHelper
 import com.google.ar.core.examples.java.common.helpers.TrackingStateHelper
-import com.google.ar.core.examples.java.common.samplerender.Framebuffer
-import com.google.ar.core.examples.java.common.samplerender.Mesh
-import com.google.ar.core.examples.java.common.samplerender.SampleRender
-import com.google.ar.core.examples.java.common.samplerender.Shader
-import com.google.ar.core.examples.java.common.samplerender.Texture
+import com.google.ar.core.examples.java.common.samplerender.*
 import com.google.ar.core.examples.java.common.samplerender.arcore.BackgroundRenderer
 import com.google.ar.core.exceptions.CameraNotAvailableException
 import java.io.IOException
+import java.util.*
 
 
 class HelloGeoRenderer(val activity: HelloGeoActivity) :
@@ -202,7 +202,6 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
       }
     }
     var nearestAnchorIndex: Pair<Int?,Float?> = Pair(null,null)
-    Log.i("AMDG markers length:","${markers.size}")
     val handler = Handler(Looper.getMainLooper())
     handler.post {
         markers.forEachIndexed{index, item ->
@@ -214,21 +213,20 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
             userLoc.latitude = earth.cameraGeospatialPose.latitude
             userLoc.longitude = earth.cameraGeospatialPose.longitude
             val dist = itemLoc.distanceTo(userLoc)
-            Log.i("AMDG item index: $index", "dist: $dist")
             if(dist < (nearestAnchorIndex.second ?: Float.MAX_VALUE)){
               nearestAnchorIndex = Pair(index,dist)
             }
             val collectButton: Button = activity.findViewById(R.id.collect_button)
             if(dist < 10){
-              val bagTextView: TextView = activity.findViewById(R.id.bag_textview)
               collectButton.visibility = View.VISIBLE
               collectButton.setOnClickListener() {
-                nearestAnchorIndex.first?.let { it1 -> collectStars(it1) }
                 collectButton.visibility = View.INVISIBLE
+                val bagTextView: TextView = activity.findViewById(R.id.bag_textview)
                 val currentBag = bagTextView.text.toString()
                 val bagNum = currentBag.first().toString().toInt().inc()
                 val newBagNum = "$bagNum/5"
                 bagTextView.text = newBagNum
+                nearestAnchorIndex.first?.let { it1 -> collectStars(it1) }
               }
             }
             else{
@@ -245,11 +243,12 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
 
   var earthAnchors: ArrayList<Anchor> = arrayListOf()
   var markers: ArrayList<Marker> = arrayListOf()
-
+  lateinit var startTime: Date
 
 
   fun startRundom() {
-    // TODO: place an anchor at the given position.
+    val c = Calendar.getInstance()
+    startTime = c.time
     val earth = session?.earth ?: return
     if (earth.trackingState != TrackingState.TRACKING) {
       return
@@ -265,11 +264,22 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
      earthAnchors.removeAt(index)
      markers.removeAt(index)
      if(markers.size == 0){
-       SuccessfulFragment().show(activity.supportFragmentManager,"success-dialog")
+       val c = Calendar.getInstance()
        val bagTextView: TextView = activity.findViewById(R.id.bag_textview)
+       val endTime = c.time
+       val diff = (endTime.time - startTime.time)
+       val elapsedTime = SimpleDateFormat("mm:ss:SSS").format(Date(diff))
+       val bundle = Bundle()
+       val message = elapsedTime.toString()
+       bundle.putString("time", message)
+       val fragInfo = SuccessfulFragment()
+       fragInfo.arguments = bundle
+       fragInfo.show(activity.supportFragmentManager, "success-dialog")
+       Log.i("AMDG current bagTextView", bagTextView.text.toString())
        bagTextView.text = "0/5"
        bagTextView.visibility = View.INVISIBLE
        val startButton: Button = activity.findViewById(R.id.start_button)
+       Log.i("AMDG after bagTextView", bagTextView.text.toString())
        startButton.visibility = View.VISIBLE
      }
    }

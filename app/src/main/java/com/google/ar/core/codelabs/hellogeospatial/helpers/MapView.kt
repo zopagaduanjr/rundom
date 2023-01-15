@@ -66,7 +66,7 @@ class MapView(val activity: HelloGeoActivity, val googleMap: GoogleMap) {
     val markers = arrayListOf<Marker>()
     val location = earth.cameraGeospatialPose
     val meterRadius = 4
-    for (i in 1..2) {
+    for (i in 1..5) {
       val random = Random()
       val radiusInDegrees = (meterRadius / 111000f).toDouble()
 

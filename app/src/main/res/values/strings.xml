@@ -15,7 +15,7 @@
    limitations under the License.
 -->
 <resources>
-  <string translatable="false" name="app_name">Hello Geo</string>
+  <string translatable="false" name="app_name">rundom</string>
   <string translatable="false" name="geospatial_pose">LAT/LNG: %.6f˚, %.6f˚\n\t\t\tACCURACY: %.2fm\nALTITUDE: %.2fm\n\t\t\tACCURACY: %.2fm\nHEADING: %.1f˚\n\t\t\tACCURACY: %.1f˚</string>
   <string name="earth_state">EarthState: %1$s\nTrackingState: %2$s\n%3$s</string>
   <string name="start">Start</string>

@@ -29,6 +29,8 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
 import com.google.ar.core.Anchor
 import com.google.ar.core.Earth
 import com.google.ar.core.codelabs.hellogeospatial.HelloGeoActivity
@@ -44,6 +46,7 @@ class MapView(val activity: HelloGeoActivity, val googleMap: GoogleMap) {
   var setInitialCameraPosition = false
   val cameraMarker = createMarker(CAMERA_MARKER_COLOR)
   var cameraIdle = true
+  lateinit var currentPolyline: Polyline
 
   init {
     googleMap.uiSettings.apply {
@@ -60,6 +63,21 @@ class MapView(val activity: HelloGeoActivity, val googleMap: GoogleMap) {
     googleMap.setOnCameraMoveListener { cameraIdle = false }
     googleMap.setOnCameraIdleListener { cameraIdle = true }
   }
+
+  fun drawRoute(locations: List<LatLng>){
+    if(this::currentPolyline.isInitialized){
+      currentPolyline.remove()
+    }
+    currentPolyline = googleMap.addPolyline(PolylineOptions()
+      .addAll(locations)
+    )
+  }
+
+   fun clearRoute(){
+     if(this::currentPolyline.isInitialized){
+       currentPolyline.remove()
+     }
+   }
 
   fun generateStars(earth: Earth): Pair<ArrayList<Anchor>, ArrayList<Marker>>{
     val anchors = arrayListOf<Anchor>()

@@ -11,9 +11,10 @@ class SuccessfulFragment : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
             val elapsedTime = this.arguments!!.getString("time")
+            val elapsedDist = this.arguments!!.get("distance")
             val builder = AlertDialog.Builder(it)
             builder.setTitle("Congratulations!")
-            builder.setMessage("You have successfully finished your Rundom track in $elapsedTime")
+            builder.setMessage("You have successfully finished your Rundom track!\n\nDistance: $elapsedDist meters\n\nDuration: $elapsedTime\n")
                 .setPositiveButton("Thanks!"
                 ) { _, _ ->
                 }

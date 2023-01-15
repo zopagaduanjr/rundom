@@ -15,7 +15,6 @@
  */
 package com.google.ar.core.codelabs.hellogeospatial
 
-import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.location.Location
 import android.opengl.Matrix
@@ -206,8 +205,8 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
           val userLoc = Location("userLoc")
           itemLoc.latitude = item.position.latitude
           itemLoc.longitude = item.position.longitude
-          userLoc.latitude = earth.cameraGeospatialPose.latitude
-          userLoc.longitude = earth.cameraGeospatialPose.longitude
+          userLoc.latitude = cameraGeospatialPose.latitude
+          userLoc.longitude = cameraGeospatialPose.longitude
           val dist = itemLoc.distanceTo(userLoc)
           if(dist < (nearestAnchorIndex.second ?: Float.MAX_VALUE)){
             nearestAnchorIndex = Pair(index,dist)
@@ -229,9 +228,16 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
             collectButton.visibility = View.INVISIBLE
           }
         }
-        if(started){
-          steps.add(LatLng(earth.cameraGeospatialPose.latitude,earth.cameraGeospatialPose.longitude))
-          activity.view.mapView?.drawRoute(steps)
+        if (started) {
+          val currentPos = LatLng(cameraGeospatialPose.latitude,cameraGeospatialPose.longitude)
+          if(steps.isEmpty()){
+            steps.add(currentPos)
+            activity.view.mapView?.drawRoute(steps)
+          }
+          else if (!currentPos.equals(steps.last())) {
+            steps.add(currentPos)
+            activity.view.mapView?.drawRoute(steps)
+          }
         }
       }
     }
@@ -249,6 +255,7 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
 
 
   fun startRundom() {
+    steps = arrayListOf()
     started = true
     val c = Calendar.getInstance()
     startTime = c.time
@@ -261,6 +268,30 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
     markers = result.second
   }
 
+  private fun millisecondsToHMS(milliSeconds: Long): String {
+    val s: Long = milliSeconds / 1000 % 60
+
+    val m: Long = milliSeconds / (1000*60) % 60
+
+    val h: Long = milliSeconds / (1000*60*60) % 24
+
+    return String.format("%02d:%02d:%02d", h, m, s)
+  }
+  private fun getTotalDistance(coords: ArrayList<LatLng>): Double {
+    var distance = 0.0
+    for (i in 0..(coords.size - 2)) {
+      val currentCoord = Location("currentCoord")
+      val nextCoord = Location("nextCoord")
+      currentCoord.latitude = coords[i].latitude
+      currentCoord.longitude = coords[i].longitude
+      nextCoord.latitude = coords[i+1].latitude
+      nextCoord.longitude = coords[i+1].longitude
+      val dist = currentCoord.distanceTo(nextCoord)
+      distance += dist
+    }
+    return distance
+  }
+
    fun collectStars(index: Int){
      earthAnchors[index].detach()
      markers[index].remove()
@@ -271,10 +302,13 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
        val bagTextView: TextView = activity.findViewById(R.id.bag_textview)
        val endTime = c.time
        val diff = (endTime.time - startTime.time)
-       val elapsedTime = SimpleDateFormat("mm:ss:SSS").format(Date(diff))
+       Log.i("AMDG ey diff", diff.toString())
+       Log.i("AMDG ey totSteps", steps.size.toString())
+       val elapsedTime = millisecondsToHMS(diff)
+       val elapsedDist = String.format("%.2f", getTotalDistance(steps))
        val bundle = Bundle()
-       val message = elapsedTime.toString()
-       bundle.putString("time", message)
+       bundle.putString("time", elapsedTime)
+       bundle.putString("distance", elapsedDist)
        val fragInfo = SuccessfulFragment()
        fragInfo.arguments = bundle
        fragInfo.show(activity.supportFragmentManager, "success-dialog")

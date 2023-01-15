@@ -66,11 +66,13 @@ class MapView(val activity: HelloGeoActivity, val googleMap: GoogleMap) {
 
   fun drawRoute(locations: List<LatLng>){
     if(this::currentPolyline.isInitialized){
-      currentPolyline.remove()
+      currentPolyline.points = locations
     }
-    currentPolyline = googleMap.addPolyline(PolylineOptions()
-      .addAll(locations)
-    )
+    else{
+      currentPolyline = googleMap.addPolyline(PolylineOptions()
+        .addAll(locations)
+      )
+    }
   }
 
    fun clearRoute(){
@@ -83,7 +85,7 @@ class MapView(val activity: HelloGeoActivity, val googleMap: GoogleMap) {
     val anchors = arrayListOf<Anchor>()
     val markers = arrayListOf<Marker>()
     val location = earth.cameraGeospatialPose
-    val meterRadius = 4
+    val meterRadius = 2
     for (i in 1..5) {
       val random = Random()
       val radiusInDegrees = (meterRadius / 111000f).toDouble()

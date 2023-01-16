@@ -94,12 +94,12 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
       virtualObjectTexture =
         Texture.createFromAsset(
           render,
-          "models/shoes.jpg",
+          "models/star.png",
           Texture.WrapMode.CLAMP_TO_EDGE,
           Texture.ColorFormat.SRGB
         )
 
-      virtualObjectMesh = Mesh.createFromAsset(render, "models/shoes_v2.obj")
+      virtualObjectMesh = Mesh.createFromAsset(render, "models/stars_v2.obj")
       virtualObjectShader =
         Shader.createFromAssets(
           render,
@@ -302,14 +302,13 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
        val bagTextView: TextView = activity.findViewById(R.id.bag_textview)
        val endTime = c.time
        val diff = (endTime.time - startTime.time)
-       Log.i("AMDG ey diff", diff.toString())
-       Log.i("AMDG ey totSteps", steps.size.toString())
        val elapsedTime = millisecondsToHMS(diff)
        val elapsedDist = String.format("%.2f", getTotalDistance(steps))
        val bundle = Bundle()
        bundle.putString("time", elapsedTime)
        bundle.putString("distance", elapsedDist)
        val fragInfo = SuccessfulFragment()
+       fragInfo.isCancelable = false
        fragInfo.arguments = bundle
        fragInfo.show(activity.supportFragmentManager, "success-dialog")
        bagTextView.text = "0/5"

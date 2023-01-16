@@ -15,22 +15,12 @@
  */
 package com.google.ar.core.codelabs.hellogeospatial.helpers
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.LightingColorFilter
-import android.graphics.Paint
+import android.graphics.*
+import android.location.Location
 import androidx.annotation.ColorInt
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.Polyline
-import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.*
 import com.google.ar.core.Anchor
 import com.google.ar.core.Earth
 import com.google.ar.core.codelabs.hellogeospatial.HelloGeoActivity
@@ -39,6 +29,7 @@ import java.util.*
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
+
 
 class MapView(val activity: HelloGeoActivity, val googleMap: GoogleMap) {
   private val CAMERA_MARKER_COLOR: Int = Color.argb(255, 0, 255, 0)
@@ -81,27 +72,90 @@ class MapView(val activity: HelloGeoActivity, val googleMap: GoogleMap) {
      }
    }
 
+  private fun createOuterBounds(): List<LatLng?> {
+    val delta = 0.01f
+    return object : ArrayList<LatLng?>() {
+      init {
+        add(LatLng((90 - delta).toDouble(), (-180 + delta).toDouble()))
+        add(LatLng(0.0, (-180 + delta).toDouble()))
+        add(LatLng((-90 + delta).toDouble(), (-180 + delta).toDouble()))
+        add(LatLng((-90 + delta).toDouble(), 0.0))
+        add(LatLng((-90 + delta).toDouble(), (180 - delta).toDouble()))
+        add(LatLng(0.0, (180 - delta).toDouble()))
+        add(LatLng((90 - delta).toDouble(), (180 - delta).toDouble()))
+        add(LatLng((90 - delta).toDouble(), 0.0))
+        add(LatLng((90 - delta).toDouble(), (-180 + delta).toDouble()))
+      }
+    }
+  }
+
+  private val EARTH_RADIUS = 6371
+
+  private fun createHole(center: LatLng, radiusMeter: Double): Iterable<LatLng> {
+    val radiusKM = radiusMeter * 0.001
+    val points = 50
+    val radiusLatitude = Math.toDegrees((radiusKM / EARTH_RADIUS.toFloat()))
+    val radiusLongitude = radiusLatitude / cos(Math.toRadians(center.latitude))
+    val result: MutableList<LatLng> = ArrayList(points)
+    val anglePerCircleRegion = 2 * Math.PI / points
+    for (i in 0 until points) {
+      val theta = i * anglePerCircleRegion
+      val latitude = center.latitude + radiusLatitude * Math.sin(theta)
+      val longitude = center.longitude + radiusLongitude * Math.cos(theta)
+      result.add(LatLng(latitude, longitude))
+    }
+    return result
+  }
+
+  private fun createPolygonWithCircle(center: LatLng, radiusMeter: Double): PolygonOptions {
+    return PolygonOptions()
+      .fillColor(0xff789E9E9E.toInt())
+      .addAll(createOuterBounds())
+      .addHole(createHole(center, radiusMeter))
+      .strokeWidth(0f)
+  }
+
+  fun generateRadius(location: LatLng, radiusMeter: Double){
+    val polygonOptions = createPolygonWithCircle(location,radiusMeter)
+    googleMap.addPolygon(polygonOptions)
+//    googleMap.addCircle(CircleOptions().center(location).radius(radiusMeter))
+  }
+
   fun generateStars(earth: Earth): Pair<ArrayList<Anchor>, ArrayList<Marker>>{
     val anchors = arrayListOf<Anchor>()
     val markers = arrayListOf<Marker>()
     val location = earth.cameraGeospatialPose
-    val meterRadius = 3
+    val meterRadius = 1000
+    val radiusInDegrees = (meterRadius / 111000f).toDouble()
     for (i in 1..5) {
-      val random = Random()
-      val radiusInDegrees = (meterRadius / 111000f).toDouble()
+      var isOutOfBubble = true
+      lateinit var ranLatLng: LatLng
+      while(isOutOfBubble){
+        val random = Random()
+        val u: Double = random.nextDouble()
+        val v: Double = random.nextDouble()
+        val w = radiusInDegrees * sqrt(u)
+        val t = 2 * Math.PI * v
+        val x = w * cos(t)
+        val y = w * sin(t)
+        val newX = x / cos(Math.toRadians(location.longitude))
 
-      val u: Double = random.nextDouble()
-      val v: Double = random.nextDouble()
-      val w = radiusInDegrees * sqrt(u)
-      val t = 2 * Math.PI * v
-      val x = w * cos(t)
-      val y = w * sin(t)
-      val newX = x / cos(Math.toRadians(location.longitude))
+        val foundLatitude: Double = newX + location.latitude
+        val foundLongitude: Double = y + location.longitude
+        val userLoc = Location("itemLoc")
+        val ranLoc = Location("ranLoc")
+        userLoc.latitude = location.latitude
+        userLoc.longitude = location.longitude
+        ranLoc.latitude = foundLatitude
+        ranLoc.longitude = foundLongitude
+        val dist = userLoc.distanceTo(ranLoc)
+        if(dist < meterRadius){
+          isOutOfBubble = false
+          ranLatLng = LatLng(foundLatitude,foundLongitude)
+        }
+      }
 
-      val foundLongitude: Double = newX + location.latitude
-      val foundLatitude: Double = y + location.longitude
-      val ranLoc = LatLng(foundLongitude, foundLatitude)
-      val marker: Marker? = googleMap.addMarker(MarkerOptions().position(ranLoc).title("Star $i"))
+      val marker: Marker? = googleMap.addMarker(MarkerOptions().position(ranLatLng).title("Star $i"))
       if(marker != null){
         markers.add(marker)
       }
@@ -113,9 +167,10 @@ class MapView(val activity: HelloGeoActivity, val googleMap: GoogleMap) {
       val qy = 0f
       val qz = 0f
       val qw = 1f
-      val anchor = earth.createAnchor(ranLoc.latitude, ranLoc.longitude, altitude, qx, qy, qz, qw)
+      val anchor = earth.createAnchor(ranLatLng.latitude, ranLatLng.longitude, altitude, qx, qy, qz, qw)
       anchors.add(anchor)
     }
+    generateRadius(LatLng(location.latitude,location.longitude),meterRadius.toDouble())
     return Pair(anchors,markers)
   }
 

@@ -99,7 +99,7 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
           Texture.ColorFormat.SRGB
         )
 
-      virtualObjectMesh = Mesh.createFromAsset(render, "models/shoes.obj")
+      virtualObjectMesh = Mesh.createFromAsset(render, "models/shoes_v2.obj")
       virtualObjectShader =
         Shader.createFromAssets(
           render,

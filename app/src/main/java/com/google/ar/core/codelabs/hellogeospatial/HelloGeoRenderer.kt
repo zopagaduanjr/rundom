@@ -94,12 +94,12 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
       virtualObjectTexture =
         Texture.createFromAsset(
           render,
-          "models/spatial_marker_baked.png",
+          "models/shoes.jpg",
           Texture.WrapMode.CLAMP_TO_EDGE,
           Texture.ColorFormat.SRGB
         )
 
-      virtualObjectMesh = Mesh.createFromAsset(render, "models/geospatial_marker.obj")
+      virtualObjectMesh = Mesh.createFromAsset(render, "models/shoes.obj")
       virtualObjectShader =
         Shader.createFromAssets(
           render,

@@ -45,21 +45,29 @@ class HelloGeoView(val activity: HelloGeoActivity) : DefaultLifecycleObserver {
     }
 
   val statusText = root.findViewById<TextView>(R.id.statusText)
-  fun updateStatusText(earth: Earth, cameraGeospatialPose: GeospatialPose?) {
+  fun updateStatusText(earth: Earth, cameraGeospatialPose: GeospatialPose?, distances: ArrayList<Float>) {
     activity.runOnUiThread {
-      val poseText = if (cameraGeospatialPose == null) "" else
-        activity.getString(R.string.geospatial_pose,
-                           cameraGeospatialPose.latitude,
-                           cameraGeospatialPose.longitude,
-                           cameraGeospatialPose.horizontalAccuracy,
-                           cameraGeospatialPose.altitude,
-                           cameraGeospatialPose.verticalAccuracy,
-                           cameraGeospatialPose.heading,
-                           cameraGeospatialPose.headingAccuracy)
-      statusText.text = activity.resources.getString(R.string.earth_state,
-                                                     earth.earthState.toString(),
-                                                     earth.trackingState.toString(),
-                                                     poseText)
+        val poseText = if (cameraGeospatialPose == null) "" else
+            activity.getString(
+                R.string.geospatial_pose,
+                cameraGeospatialPose.latitude,
+                cameraGeospatialPose.longitude,
+                cameraGeospatialPose.horizontalAccuracy,
+                cameraGeospatialPose.altitude,
+                cameraGeospatialPose.verticalAccuracy,
+                cameraGeospatialPose.heading,
+                cameraGeospatialPose.headingAccuracy)
+        var distanceText = ""
+        distances.forEachIndexed{index, dist ->
+            distanceText = "$distanceText\nDistance to Star ${index+1}: $dist"
+        }
+        statusText.text = activity.resources.getString(
+            R.string.earth_state,
+            earth.earthState.toString(),
+            earth.trackingState.toString(),
+            poseText,
+          distanceText,
+        )
     }
   }
 

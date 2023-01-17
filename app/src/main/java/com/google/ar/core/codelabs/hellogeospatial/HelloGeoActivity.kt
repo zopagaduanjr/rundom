@@ -90,9 +90,6 @@ class HelloGeoActivity : AppCompatActivity() {
       startButton.visibility = View.INVISIBLE
       bagTextView.visibility = View.VISIBLE
     }
-    //TODO: add collect button
-
-    //TODO: add refernce to 0/5 text
     SampleRender(view.surfaceView, renderer, assets)
   }
 

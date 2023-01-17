@@ -24,6 +24,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.Switch
 import android.widget.TextView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -200,6 +201,7 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
       val handler = Handler(Looper.getMainLooper())
       handler.post {
         var nearestAnchorIndex: Pair<Int?,Float?> = Pair(null,null)
+        val distances = arrayListOf<Float>()
         markers.forEachIndexed{index, item ->
           val itemLoc = Location("itemLoc")
           val userLoc = Location("userLoc")
@@ -208,27 +210,37 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
           userLoc.latitude = cameraGeospatialPose.latitude
           userLoc.longitude = cameraGeospatialPose.longitude
           val dist = itemLoc.distanceTo(userLoc)
+          distances.add(dist)
           if(dist < (nearestAnchorIndex.second ?: Float.MAX_VALUE)){
             nearestAnchorIndex = Pair(index,dist)
           }
-          val collectButton: Button = activity.findViewById(R.id.collect_button)
-          if(dist < 10){
-            collectButton.visibility = View.VISIBLE
-            collectButton.setOnClickListener() {
-              collectButton.visibility = View.INVISIBLE
-              val bagTextView: TextView = activity.findViewById(R.id.bag_textview)
-              val currentBag = bagTextView.text.toString()
-              val bagNum = currentBag.first().toString().toInt().inc()
-              val newBagNum = "$bagNum/5"
-              bagTextView.text = newBagNum
-              nearestAnchorIndex.first?.let { it1 -> collectStars(it1) }
-            }
-          }
-          else{
+        }
+        val collectButton: Button = activity.findViewById(R.id.collect_button)
+        val consoleSwitch: Switch = activity.findViewById(R.id.console_switch)
+        val statusText: TextView = activity.findViewById(R.id.statusText)
+        val nearestDist = nearestAnchorIndex.second
+        if (nearestDist != null && nearestDist < 10) {
+          collectButton.visibility = View.VISIBLE
+          collectButton.setOnClickListener() {
             collectButton.visibility = View.INVISIBLE
+            val bagTextView: TextView = activity.findViewById(R.id.bag_textview)
+            val currentBag = bagTextView.text.toString()
+            val bagNum = currentBag.first().toString().toInt().inc()
+            val newBagNum = "$bagNum/5"
+            bagTextView.text = newBagNum
+            nearestAnchorIndex.first?.let { it1 -> collectStars(it1) }
           }
         }
+        else {
+          collectButton.visibility = View.INVISIBLE
+        }
         if (started) {
+          if(consoleSwitch.isChecked){
+            statusText.visibility = View.VISIBLE
+            activity.view.updateStatusText(earth,cameraGeospatialPose,distances)
+          }else{
+            statusText.visibility = View.INVISIBLE
+          }
           val currentPos = LatLng(cameraGeospatialPose.latitude,cameraGeospatialPose.longitude)
           if(steps.isEmpty()){
             steps.add(currentPos)

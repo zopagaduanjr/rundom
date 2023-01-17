@@ -24,9 +24,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.ar.core.Config
 import com.google.ar.core.Session
-import com.google.ar.core.codelabs.hellogeospatial.helpers.ARCoreSessionLifecycleHelper
-import com.google.ar.core.codelabs.hellogeospatial.helpers.GeoPermissionsHelper
-import com.google.ar.core.codelabs.hellogeospatial.helpers.HelloGeoView
+import com.google.ar.core.codelabs.hellogeospatial.helpers.*
 import com.google.ar.core.examples.java.common.helpers.FullScreenHelper
 import com.google.ar.core.examples.java.common.samplerender.SampleRender
 import com.google.ar.core.exceptions.CameraNotAvailableException
@@ -42,7 +40,7 @@ class HelloGeoActivity : AppCompatActivity() {
 
   lateinit var arCoreSessionHelper: ARCoreSessionLifecycleHelper
   lateinit var view: HelloGeoView
-  private lateinit var renderer: HelloGeoRenderer
+  lateinit var renderer: HelloGeoRenderer
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -86,9 +84,8 @@ class HelloGeoActivity : AppCompatActivity() {
     collectButton.visibility = View.INVISIBLE
     bagTextView.visibility = View.INVISIBLE
     startButton.setOnClickListener{
-      view.activity.renderer.startRundom()
-      startButton.visibility = View.INVISIBLE
-      bagTextView.visibility = View.VISIBLE
+      val fragInfo = ChooseBubbleFragment()
+      fragInfo.show(supportFragmentManager, "choose-bubble")
     }
     SampleRender(view.surfaceView, renderer, assets)
   }

@@ -121,55 +121,54 @@ class MapView(val activity: HelloGeoActivity, val googleMap: GoogleMap) {
 //    googleMap.addCircle(CircleOptions().center(location).radius(radiusMeter))
   }
 
-  fun generateStars(earth: Earth): Pair<ArrayList<Anchor>, ArrayList<Marker>>{
+  fun generateStars(earth: Earth, meterRadius: Int): Pair<ArrayList<Anchor>, ArrayList<Marker>>{
     val anchors = arrayListOf<Anchor>()
     val markers = arrayListOf<Marker>()
     val location = earth.cameraGeospatialPose
-    val meterRadius = 1000
     val radiusInDegrees = (meterRadius / 111000f).toDouble()
-    for (i in 1..5) {
-      var isOutOfBubble = true
-      lateinit var ranLatLng: LatLng
-      while(isOutOfBubble){
-        val random = Random()
-        val u: Double = random.nextDouble()
-        val v: Double = random.nextDouble()
-        val w = radiusInDegrees * sqrt(u)
-        val t = 2 * Math.PI * v
-        val x = w * cos(t)
-        val y = w * sin(t)
-        val newX = x / cos(Math.toRadians(location.longitude))
+      for (i in 1..5) {
+        var isOutOfBubble = true
+        lateinit var ranLatLng: LatLng
+        while(isOutOfBubble){
+          val random = Random()
+          val u: Double = random.nextDouble()
+          val v: Double = random.nextDouble()
+          val w = radiusInDegrees * sqrt(u)
+          val t = 2 * Math.PI * v
+          val x = w * cos(t)
+          val y = w * sin(t)
+          val newX = x / cos(Math.toRadians(location.longitude))
 
-        val foundLatitude: Double = newX + location.latitude
-        val foundLongitude: Double = y + location.longitude
-        val userLoc = Location("itemLoc")
-        val ranLoc = Location("ranLoc")
-        userLoc.latitude = location.latitude
-        userLoc.longitude = location.longitude
-        ranLoc.latitude = foundLatitude
-        ranLoc.longitude = foundLongitude
-        val dist = userLoc.distanceTo(ranLoc)
-        if(dist < meterRadius){
-          isOutOfBubble = false
-          ranLatLng = LatLng(foundLatitude,foundLongitude)
+          val foundLatitude: Double = newX + location.latitude
+          val foundLongitude: Double = y + location.longitude
+          val userLoc = Location("itemLoc")
+          val ranLoc = Location("ranLoc")
+          userLoc.latitude = location.latitude
+          userLoc.longitude = location.longitude
+          ranLoc.latitude = foundLatitude
+          ranLoc.longitude = foundLongitude
+          val dist = userLoc.distanceTo(ranLoc)
+          if(dist < meterRadius){
+            isOutOfBubble = false
+            ranLatLng = LatLng(foundLatitude,foundLongitude)
+          }
         }
-      }
 
-      val marker: Marker? = googleMap.addMarker(MarkerOptions().position(ranLatLng).title("Star $i"))
-      if(marker != null){
-        markers.add(marker)
+        val marker: Marker? = googleMap.addMarker(MarkerOptions().position(ranLatLng).title("Star $i"))
+        if(marker != null){
+          markers.add(marker)
+        }
+        //anchors away
+        // Place the earth anchor at the same altitude as that of the camera to make it easier to view.
+        val altitude = earth.cameraGeospatialPose.altitude
+        // The rotation quaternion of the anchor in the East-Up-South (EUS) coordinate system.
+        val qx = 0f
+        val qy = 0f
+        val qz = 0f
+        val qw = 1f
+        val anchor = earth.createAnchor(ranLatLng.latitude, ranLatLng.longitude, altitude, qx, qy, qz, qw)
+        anchors.add(anchor)
       }
-      //anchors away
-      // Place the earth anchor at the same altitude as that of the camera to make it easier to view.
-      val altitude = earth.cameraGeospatialPose.altitude - 1
-      // The rotation quaternion of the anchor in the East-Up-South (EUS) coordinate system.
-      val qx = 0f
-      val qy = 0f
-      val qz = 0f
-      val qw = 1f
-      val anchor = earth.createAnchor(ranLatLng.latitude, ranLatLng.longitude, altitude, qx, qy, qz, qw)
-      anchors.add(anchor)
-    }
     generateRadius(LatLng(location.latitude,location.longitude),meterRadius.toDouble())
     return Pair(anchors,markers)
   }

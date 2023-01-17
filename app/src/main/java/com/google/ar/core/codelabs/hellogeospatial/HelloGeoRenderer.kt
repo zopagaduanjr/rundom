@@ -266,7 +266,7 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
   lateinit var startTime: Date
 
 
-  fun startRundom() {
+  fun startRundom(meterRadius: Int) {
     steps = arrayListOf()
     started = true
     val c = Calendar.getInstance()
@@ -275,7 +275,7 @@ class HelloGeoRenderer(val activity: HelloGeoActivity) :
     if (earth.trackingState != TrackingState.TRACKING) {
       return
     }
-    val result = activity.view.mapView?.generateStars(earth) ?: Pair(arrayListOf(),arrayListOf())
+    val result = activity.view.mapView?.generateStars(earth,meterRadius) ?: Pair(arrayListOf(),arrayListOf())
     earthAnchors = result.first
     markers = result.second
   }

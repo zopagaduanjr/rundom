@@ -1,14 +1,29 @@
-# ARCore Geospatial Codelab project
+# Rundom
+## An immersive scavenger hunt - running app
 
-This repository contains the template used for the [ARCore Geospatial API Codelab](https://developers.google.com/ar/develop/geospatial/java/codelab#0).
+<img src="media/collect.gif" width="30%"/>
+<br />
+<br />
+Rundom is a scavenger-running app powered by ARCore Geospatial API.
 
-This repository contains the following branches:
+Simply choose a meter range, and Rundom randomly distributes object inside the bubble. Your goal as a runner is to collect all objects as fast as possible.
+<br />
+<br />
+<p float="left" align="middle">
+    <img src="media/1.jpg" width="30%"/>
+    <img src="media/3.jpg" width="30%"/>
+    <img src="media/2.jpg" width="30%"/>
+    <img src="media/4.jpg" width="30%"/>
+    <img src="media/6.jpg" width="30%"/>
+    <img src="media/5.jpg" width="30%"/>
+</p>
+<br />
+<br />
 
-* `main`, the starting point of the Codelab;
-* `step-position-user`, corresponding to the code that you should have at the end of [step 3: Determine the user's position](https://developers.google.com/ar/develop/geospatial/java/codelab#2);
-* `step-place-anchor`, corresponding to the code that you should have at the end of [step 4: Place an anchor using Earth coordinates](https://developers.google.com/ar/develop/geospatial/java/codelab#2).
-
-If you get stuck at any point in the Codelab, use `git checkout step-position-user` or `git checkout step-place-anchor` to check out the correct code so you can move on.
+## Attributions
+This repository contains a modified [ARCore Geospatial API Codelab](https://developers.google.com/ar/develop/geospatial/java/codelab#0) template.
+- [Shoes 3D model](https://sketchfab.com/3d-models/nike-runner-scan-77c8d47e0b404810a3bddede4be801cb)
+- [Star 3D model](https://sketchfab.com/3d-models/power-star-220d54fc3d34499ab1fda41ceed7d072)
 
 ## License
 

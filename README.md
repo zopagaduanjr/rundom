@@ -2,11 +2,12 @@
 
 ### An immersive scavenger hunt - running app
 
-<img src="media/collect.gif" width="30%"/>
-<br />
+<p align="center">
+<img src="media/collect.gif" width="35%"/>
 <a href="https://twitter.com/GoogleARVR/status/1628560517529739264">
-    <img src="media/promotional_tweet.svg" width="30%"/>
+    <img src="media/promotional_tweet.svg" width="55%"/>
 </a>
+</p>
 <br />
 <br />
 Rundom is a scavenger-running app powered by ARCore Geospatial API.
